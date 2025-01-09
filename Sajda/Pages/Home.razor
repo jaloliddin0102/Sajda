@@ -1,0 +1,144 @@
+﻿@page "/"
+@using Sajda.Data
+@using Sajda.Services
+@inject SajdaTimeService PrayerService
+@using MudBlazor
+
+<div
+    style="display: flex; justify-content: center; align-items: center; height: 100vh; background-image: url('/your-background-image.jpg'); background-size: cover;">
+    <MudPaper Elevation="4" Class="prayer-time-box"
+        Style="width: 350px; padding: 20px; background-color: rgba(0, 0, 0, 0.6); color: white; text-align: center; border-radius: 15px;">
+        <MudText Typo="Typo.h4" Class="prayer-title" Style="margin-bottom: 15px; font-weight: bold;">Namoz vaqtlari
+        </MudText>
+        @foreach (var prayer in GetPrayerTimesList())
+        {
+            <div class="@GetRowClass(prayer.Name)"
+                style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <MudText Typo="Typo.subtitle1" Style="flex: 1; text-align: left;">@prayer.Name</MudText>
+                <MudText Typo="Typo.subtitle1" Style="flex: 1; text-align: right; font-weight: bold;">@prayer.Time</MudText>
+            </div>
+        }
+    </MudPaper>
+</div>
+
+<style>
+    .next-prayer {
+        background-color: green;
+        color: white;
+        padding: 10px;
+        margin: 5px 0;
+        border-radius: 10px;
+        /* Dumaloq chetlar */
+        font-weight: bold;
+    }
+
+   .current-prayer {
+    color: white;
+    font-weight: 900; /* Juda qalin matn */
+    font-size: 2.5rem; /* Matnni kattalashtirish */
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); /* Yozuvni ko'proq ajratib turish uchun soyani qo'shish */
+    padding: 10px; /* Matn atrofida bo'sh joy */
+    border-radius: 10px; /* Dumaloq burchaklar */
+    background-color: rgba(33, 168, 9, 0.2); /* Yengil fon rangini qo'shish */
+}
+</style>
+
+@code {
+    private PrayerResponse? prayerTimes;
+    private System.Timers.Timer? timer;
+
+    protected override async Task OnInitializedAsync()
+    {
+        prayerTimes = await PrayerService.GetPrayerTimes("Tashkent", "Uzbekistan");
+        timer = new System.Timers.Timer(1000);
+        timer.Elapsed += async (sender, e) => await InvokeAsync(StateHasChanged);
+        timer.Start();
+        await RequestLocation();
+    }
+
+    private List<(string Name, string Time)> GetPrayerTimesList()
+    {
+        if (prayerTimes?.Data?.Timings == null)
+            return new List<(string, string)>();
+
+        var prayerTimesList = new List<(string Name, string Time)>
+{
+("Bomdod", prayerTimes.Data.Timings.Fajr ?? "N/A"),
+("Quyosh", prayerTimes.Data.Timings.Sunrise ?? "N/A"),
+("Peshin", prayerTimes.Data.Timings.Dhuhr ?? "N/A"),
+("Asr", prayerTimes.Data.Timings.Asr ?? "N/A"),
+("Shom", prayerTimes.Data.Timings.Maghrib ?? "N/A"),
+("Xufton", prayerTimes.Data.Timings.Isha ?? "N/A")
+};
+
+        var now = DateTime.Now;
+        var timings = new List<(string Name, DateTime Time)>
+{
+("Bomdod", prayerTimes.Data.Timings.Fajr != null ? DateTime.Parse(prayerTimes.Data.Timings.Fajr) : DateTime.MinValue),
+("Quyosh", DateTime.Parse(prayerTimes.Data.Timings.Sunrise ?? "0001-01-01T00:00:00")),
+("Peshin", DateTime.Parse(prayerTimes.Data.Timings.Dhuhr ?? "0001-01-01T00:00:00")),
+("Asr", prayerTimes.Data.Timings.Asr != null ? DateTime.Parse(prayerTimes.Data.Timings.Asr) : DateTime.MinValue),
+("Shom", DateTime.Parse(prayerTimes.Data.Timings.Maghrib ?? "0001-01-01T00:00:00")),
+("Xufton", DateTime.Parse(prayerTimes.Data.Timings.Isha ?? "0001-01-01T00:00:00"))
+};
+
+        for (int i = 0; i < timings.Count; i++)
+        {
+            if (now < timings[i].Time)
+            {
+                var timeUntilNextPrayer = timings[i].Time - now;
+                var timeString = $"{timeUntilNextPrayer.Hours:D2}:{timeUntilNextPrayer.Minutes:D2}:{timeUntilNextPrayer.Seconds:D2}";
+                prayerTimesList.Add(("Keyingi namoz", $"{timings[i].Name} - {timeString}"));
+                break;
+            }
+        }
+
+        if (now > timings.Last().Time)
+        {
+            var nextFajrTime = timings.First().Time.AddDays(1);
+            var timeUntilNextFajr = nextFajrTime - now;
+            var timeString = $"{timeUntilNextFajr.Hours:D2}:{timeUntilNextFajr.Minutes:D2}:{timeUntilNextFajr.Seconds:D2}";
+            prayerTimesList.Add(("Keyingi namoz", $"Bomdod - {timeString}"));
+        }
+
+        return prayerTimesList;
+    }
+
+    private string GetRowClass(string prayerName)
+    {
+        var now = DateTime.Now.TimeOfDay;
+
+        var timings = new List<(string Name, TimeSpan Time)>
+{
+("Bomdod", DateTime.Parse(prayerTimes?.Data?.Timings?.Fajr ?? "0001-01-01T00:00:00").TimeOfDay),
+("Quyosh", DateTime.Parse(prayerTimes?.Data?.Timings?.Sunrise ?? "0001-01-01T00:00:00").TimeOfDay),
+("Peshin", DateTime.Parse(prayerTimes?.Data?.Timings?.Dhuhr ?? "0001-01-01T00:00:00").TimeOfDay),
+("Asr", DateTime.Parse(prayerTimes?.Data?.Timings?.Asr ?? "0001-01-01T00:00:00").TimeOfDay),
+("Shom", DateTime.Parse(prayerTimes?.Data?.Timings?.Maghrib ?? "0001-01-01T00:00:00").TimeOfDay),
+("Xufton", DateTime.Parse(prayerTimes?.Data?.Timings?.Isha ?? "0001-01-01T00:00:00").TimeOfDay)
+};
+
+        for (int i = 0; i < timings.Count; i++)
+        {
+            var currentTime = timings[i].Time;
+            var nextTime = i + 1 < timings.Count ? timings[i + 1].Time : TimeSpan.FromDays(1);
+
+            if (now >= currentTime && now < nextTime)
+            {
+                if (prayerName == timings[i].Name)
+                {
+                    return "current-prayer"; 
+                }
+            }
+        }
+
+        return prayerName == "Keyingi namoz" ? "next-prayer" : "";
+    }
+
+    private PrayerResponse? prayerLocation;
+
+    private async Task RequestLocation()
+    {
+        prayerLocation = await PrayerService.RequestLocation();
+    }
+}

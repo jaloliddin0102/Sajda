@@ -1,0 +1,40 @@
+@namespace Sajda.Pages
+@using MudBlazor
+@inject NavigationManager Navigation
+
+<MudAppBar Color="Color.Primary" Fixed="true">
+    <MudMenu Icon="@Icons.Material.Filled.Menu" Color="Color.Dark">
+        <MudMenuItem>
+            Jaloliddin Xolmirzayev
+        </MudMenuItem>
+    </MudMenu>
+
+    
+    <MudText Typo="Typo.body1" Class="date-time-text">
+        @CurrentTime Tashkent
+    </MudText>
+    
+    <MudSpacer />
+    
+    <MudIconButton Icon="@Icons.Custom.Brands.Telegram" Color="Color.Dark" OnClick="@OpenTelegram" />
+</MudAppBar>
+
+@code {
+    private string CurrentTime { get; set; } = DateTime.Now.ToString("HH:mm:ss ddd, dd.MM.yyyy");
+
+    protected override void OnInitialized()
+    {
+        var timer = new System.Timers.Timer(1000);
+        timer.Elapsed += (sender, args) =>
+        {
+            CurrentTime = DateTime.Now.ToString("HH:mm:ss ddd, dd.MM.yyyy");
+            InvokeAsync(StateHasChanged); 
+        };
+        timer.Start();
+    }
+
+    private void OpenTelegram()
+    {
+        Navigation.NavigateTo("https://t.me/JM01020527", forceLoad: true);
+    }
+}

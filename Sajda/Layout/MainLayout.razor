@@ -1,0 +1,14 @@
+﻿@inherits LayoutComponentBase
+@using Sajda.Pages
+
+<MudThemeProvider @bind-IsDarkMode="@isDarkMode" Theme="Sajda.Themes.Theme.SpacesTheme()" />
+<MudContainer>
+    <AppBar />
+    @Body
+</MudContainer>
+<!-- MudPopoverProvider qo'shildi -->
+<MudPopoverProvider />
+
+@code {
+    private bool isDarkMode = true;
+}
