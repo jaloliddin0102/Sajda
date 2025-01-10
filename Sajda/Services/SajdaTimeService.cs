@@ -27,7 +27,7 @@ public class SajdaTimeService(
 
     public async Task<PrayerResponse> GetPrayerTimes(string city, string country)
     {
-        string url = $"http://api.aladhan.com/v1/timingsByCity?city={city}&country={country}";
+        string url = $"https://api.aladhan.com/v1/timingsByCity?city={city}&country={country}";
 
         var response = await httpClient.GetFromJsonAsync<PrayerResponse>(url);
         return response!;
