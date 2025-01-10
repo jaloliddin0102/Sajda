@@ -5,7 +5,7 @@
 @using MudBlazor
 
 <div
-    style="display: flex; justify-content: center; align-items: center; height: 100vh; background-image: url('images/background.png'); background-size: cover; background-position: center; background-repeat: no-repeat; padding: 10px;">
+    style="display: flex; justify-content: center; align-items: center; height: 100vh; background-image: url('https://play-lh.googleusercontent.com/8w_zGZZfeEoBj__D6v9Pm6aKVREZRW-1wqKnqANWYIl5Cxz6Wjce_uq35-ozMDvMopY'); background-size: cover; background-position: center; background-repeat: no-repeat; padding: 10px;">
     <MudPaper Elevation="4" Class="prayer-time-box"
         Style="width: 400px; padding: 25px; background-color: rgba(0, 0, 0, 0.7); color: white; text-align: center; border-radius: 15px;">
         <MudText Typo="Typo.h4" Class="prayer-title" Style="margin-bottom: 20px; font-weight: bold;">Namoz vaqtlari
@@ -21,29 +21,7 @@
     </MudPaper>
 </div>
 
-<style>
-    .next-prayer {
-        background-color: green;
-        color: white;
-        padding: 10px;
-        margin: 5px 0;
-        border-radius: 10px;
-        font-weight: bold;
-        text-align: center;
-        font-size: 18px;
-    }
-
-    .current-prayer {
-        color: white;
-        font-weight: 900;
-        font-size: 2rem;
-        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-        padding: 10px;
-        border-radius: 10px;
-        background-color: rgba(33, 168, 9, 0.2);
-        text-align: center;
-    }
-</style>
+<link href="css/Home.css" rel="stylesheet">
 
 @code {
     private PrayerResponse? prayerTimes;
@@ -61,7 +39,7 @@
     private List<(string Name, string Time)> GetPrayerTimesList()
     {
         if (prayerTimes?.Data?.Timings == null)
-            return new List<(string, string)>();
+            return new List<(string, string)>(); // Agar ma'lumotlar yo'q bo'lsa, bo'sh ro'yxat qaytaradi
 
         var prayerTimesList = new List<(string Name, string Time)>
         {
