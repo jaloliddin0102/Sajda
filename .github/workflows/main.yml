@@ -1,37 +1,28 @@
-name: Build and Deploy Blazor WASM to GitHub Pages
+name: Build and Deploy Blazor Web App
 
 on:
   push:
     branches:
-      - main  # Deploys when pushing to the main branch
+      - main
 
 jobs:
-  build:
+  build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v2
-      with:
-        fetch-depth: 0 # Ensure full history is fetched to avoid any issues with the gh-pages branch
+      uses: actions/checkout@v3
 
     - name: Setup .NET
-      uses: actions/setup-dotnet@v1
+      uses: actions/setup-dotnet@v3
       with:
-        dotnet-version: '8.0.x' # Make sure this matches your .NET version
+        dotnet-version: '8.0' # Loyihangizning .NET versiyasini kiriting
 
     - name: Restore dependencies
-      run: dotnet restore ./Sajda/Sajda.csproj
+      run: dotnet restore
 
-    - name: Build
-      run: dotnet build --configuration Release ./Sajda/NamozVaqSajdatlari.csproj
-
-    - name: Publish
-      run: dotnet publish --configuration Release --output ./publish ./Sajda/Sajda.csproj
-
-    - name: Update base href in index.html
-      run: |
-        sed -i 's|<base href="/" />|<base href="/Sajda/" />|' ./publish/wwwroot/index.html
+    - name: Build project
+      run: dotnet publish -c Release -o ./publish
 
     - name: Deploy to GitHub Pages
       uses: peaceiris/actions-gh-pages@v3
