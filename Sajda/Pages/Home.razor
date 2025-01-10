@@ -55,7 +55,7 @@
         timer = new System.Timers.Timer(1000);
         timer.Elapsed += async (sender, e) => await InvokeAsync(StateHasChanged);
         timer.Start();
-        await RequestLocation();
+        @* await RequestLocation(); *@
     }
 
     private List<(string Name, string Time)> GetPrayerTimesList()
@@ -137,10 +137,10 @@
         return prayerName == "Keyingi namoz" ? "next-prayer" : "";
     }
 
-    private PrayerResponse? prayerLocation;
+    @* private PrayerResponse? prayerLocation;
 
     private async Task RequestLocation()
     {
         prayerLocation = await PrayerService.RequestLocation();
-    }
+    } *@
 }
