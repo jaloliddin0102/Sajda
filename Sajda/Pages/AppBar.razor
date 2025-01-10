@@ -12,7 +12,7 @@
     </MudMenu>
 
     <MudText Typo="Typo.body1" Class="date-time-text">
-        @CurrentTime Tashkent
+        @CurrentDate Tashkent
     </MudText>
 
     <MudSpacer />
@@ -21,14 +21,14 @@
 </MudAppBar>
 
 @code {
-    private string CurrentTime { get; set; } = DateTime.Now.ToString("HH:mm:ss dddd, dd.MM.yyyy", new CultureInfo("en-US"));
+    private string CurrentDate { get; set; } = DateTime.Now.ToString("dddd, dd.MM.yyyy", new CultureInfo("en-US"));
 
     protected override void OnInitialized()
     {
-        var timer = new System.Timers.Timer(1000);
+        var timer = new System.Timers.Timer(60000); // Sana va hafta kunlari faqat bir marta yangilanadi
         timer.Elapsed += (sender, args) =>
         {
-            CurrentTime = DateTime.Now.ToString("HH:mm:ss dddd, dd.MM.yyyy", new CultureInfo("en-US"));
+            CurrentDate = DateTime.Now.ToString("dddd, dd.MM.yyyy", new CultureInfo("en-US"));
             InvokeAsync(StateHasChanged);
         };
         timer.Start();

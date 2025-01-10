@@ -5,63 +5,73 @@
 @using MudBlazor
 
 <div
-    <MudPaper Elevation="4" Class="prayer-time-box"
-        Style="width: 400px; padding: 25px; background-color: rgba(0, 0, 0, 0.7); color: white; text-align: center; border-radius: 15px;">
-        <MudText Typo="Typo.h4" Class="prayer-title" Style="margin-bottom: 20px; font-weight: bold;">Namoz vaqtlari
-        </MudText>
-        @foreach (var prayer in GetPrayerTimesList())
-        {
-            <div class="@GetRowClass(prayer.Name)"
-                style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                <MudText Typo="Typo.subtitle1" Style="flex: 1; text-align: left;">@prayer.Name</MudText>
-                <MudText Typo="Typo.subtitle1" Style="flex: 1; text-align: right; font-weight: bold;">@prayer.Time</MudText>
+    style="position: fixed; top: 0; left: 0; width: 100%; height: 100vh; background-image: url('https://i.pinimg.com/736x/b5/3d/bb/b53dbb3d758c7f1eb4272d8f1b7e39f8.jpg'); background-size: cover; background-position: center; background-repeat: no-repeat;">
+    <div
+        style="display: flex; justify-content: center; align-items: center; width: 100%; height: 100%; flex-direction: column; padding: 10px; box-sizing: border-box;">
+        <!-- Current Time Display -->
+        <MudPaper Elevation="4"
+            Style="width: 90%; max-width: 350px; padding: 10px 15px; background-color: rgba(0, 0, 0, 0.8); color: white; text-align: center; border-radius: 10px; margin-bottom: 15px; min-height: 80px;">
+            <MudText Typo="Typo.h6" Style="font-weight: bold;">Hozirgi vaqt</MudText>
+            <MudText Typo="Typo.h4" Style="margin-top: 5px; font-weight: bold;">@currentTime</MudText>
+        </MudPaper>
+
+        <!-- Prayer Times Table -->
+        <MudPaper Elevation="4"
+            Style="width: 90%; max-width: 350px; padding: 20px; background-color: rgba(0, 0, 0, 0.7); color: white; text-align: center; border-radius: 10px; min-height: 300px; display: flex; flex-direction: column;">
+            <MudText Typo="Typo.h4" Style="margin-bottom: 15px; font-weight: bold;">Namoz vaqtlari</MudText>
+            <div style="flex-grow: 1; display: flex; flex-direction: column; justify-content: space-between;">
+                @foreach (var prayer in GetPrayerTimesList())
+                {
+                    <div class="@GetRowClass(prayer.Name)"
+                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                        <MudText Typo="Typo.subtitle2" Style="flex: 1; text-align: left; font-size: 14px;">@prayer.Name
+                        </MudText>
+                        <MudText Typo="Typo.subtitle2"
+                            Style="flex: 1; text-align: right; font-weight: bold; font-size: 14px;">@prayer.Time</MudText>
+                    </div>
+                }
             </div>
-        }
-    </MudPaper>
+        </MudPaper>
+    </div>
 </div>
 
 <style>
-    body {
-        background-image: url('https://i.pinimg.com/736x/b5/3d/bb/b53dbb3d758c7f1eb4272d8f1b7e39f8.jpg');
-        background-size: cover;
-        background-repeat: no-repeat;
-        background-attachment: fixed;
-        background-position: center;
-    }
-    .next-prayer {
+    .current-prayer {
         background-color: green;
         color: white;
-        padding: 10px;
-        margin: 5px 0;
+        padding: 8px;
+        margin: 4px 0;
         border-radius: 10px;
         font-weight: bold;
         text-align: center;
-        font-size: 18px;
+        font-size: 14px;
     }
 
-    .current-prayer {
+    .next-prayer {
         color: white;
         font-weight: 900;
-        font-size: 2rem;
+        font-size: 1.3rem;
         text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-        padding: 10px;
-        border-radius: 10px;
-        background-color: rgba(33, 168, 9, 0.2);
-        text-align: center;
     }
 </style>
 
 @code {
     private PrayerResponse? prayerTimes;
     private System.Timers.Timer? timer;
+    private string currentTime = DateTime.Now.ToString("HH:mm:ss");
 
     protected override async Task OnInitializedAsync()
     {
-        prayerTimes = await PrayerService.GetPrayerTimes("Tashkent", "Uzbekistan");
+        prayerTimes = await PrayerService.RequestLocation();
+
+        // Timer to update the UI every second
         timer = new System.Timers.Timer(1000);
-        timer.Elapsed += async (sender, e) => await InvokeAsync(StateHasChanged);
+        timer.Elapsed += async (sender, e) =>
+        {
+            currentTime = DateTime.Now.ToString("HH:mm:ss");
+            await InvokeAsync(StateHasChanged);
+        };
         timer.Start();
-        @* await RequestLocation(); *@
     }
 
     private List<(string Name, string Time)> GetPrayerTimesList()
@@ -82,10 +92,10 @@
         var now = DateTime.Now;
         var timings = new List<(string Name, DateTime Time)>
         {
-            ("Bomdod", prayerTimes.Data.Timings.Fajr != null ? DateTime.Parse(prayerTimes.Data.Timings.Fajr) : DateTime.MinValue),
+            ("Bomdod", DateTime.Parse(prayerTimes.Data.Timings.Fajr ?? "0001-01-01T00:00:00")),
             ("Quyosh", DateTime.Parse(prayerTimes.Data.Timings.Sunrise ?? "0001-01-01T00:00:00")),
             ("Peshin", DateTime.Parse(prayerTimes.Data.Timings.Dhuhr ?? "0001-01-01T00:00:00")),
-            ("Asr", prayerTimes.Data.Timings.Asr != null ? DateTime.Parse(prayerTimes.Data.Timings.Asr) : DateTime.MinValue),
+            ("Asr", DateTime.Parse(prayerTimes.Data.Timings.Asr ?? "0001-01-01T00:00:00")),
             ("Shom", DateTime.Parse(prayerTimes.Data.Timings.Maghrib ?? "0001-01-01T00:00:00")),
             ("Xufton", DateTime.Parse(prayerTimes.Data.Timings.Isha ?? "0001-01-01T00:00:00"))
         };
@@ -116,6 +126,7 @@
     {
         var now = DateTime.Now.TimeOfDay;
 
+        // Namoz vaqtlarini TimeSpan formatiga o'zgartirish
         var timings = new List<(string Name, TimeSpan Time)>
         {
             ("Bomdod", DateTime.Parse(prayerTimes?.Data?.Timings?.Fajr ?? "0001-01-01T00:00:00").TimeOfDay),
@@ -131,22 +142,13 @@
             var currentTime = timings[i].Time;
             var nextTime = i + 1 < timings.Count ? timings[i + 1].Time : TimeSpan.FromDays(1);
 
-            if (now >= currentTime && now < nextTime)
+            // Agar hozirgi vaqt shu namoz orasida bo'lsa va satr nomi mos bo'lsa
+            if (now >= currentTime && now < nextTime && prayerName == timings[i].Name)
             {
-                if (prayerName == timings[i].Name)
-                {
-                    return "current-prayer";
-                }
+                return "current-prayer"; // Yashil rang qo'llanadi
             }
         }
 
         return prayerName == "Keyingi namoz" ? "next-prayer" : "";
-    }
-
-    private PrayerResponse? prayerLocation;
-
-    private async Task RequestLocation()
-    {
-        prayerLocation = await PrayerService.RequestLocation();
     }
 }
