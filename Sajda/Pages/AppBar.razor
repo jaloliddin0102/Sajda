@@ -5,35 +5,30 @@
 @using System.Globalization
 
 <MudAppBar Color="Color.Primary" Fixed="true">
-    <!-- Chap tomonda sana -->
-    <MudText Typo="Typo.body1" Class="date-time-text">
-        @CurrentDate
-    </MudText>
+    <MudMenu Icon="@Icons.Material.Filled.Menu" Color="Color.Dark">
+        <MudMenuItem>
+            Jaloliddin Xolmirzayev
+        </MudMenuItem>
+    </MudMenu>
 
-    <MudSpacer />
-
-    <!-- O'rtada hozirgi vaqt va Tashkent matni -->
     <MudText Typo="Typo.body1" Class="date-time-text">
         @CurrentTime Tashkent
     </MudText>
 
     <MudSpacer />
 
-    <!-- O'ng tomonda Telegram ikonkasi -->
     <MudIconButton Icon="@Icons.Custom.Brands.Telegram" Color="Color.Dark" OnClick="@OpenTelegram" />
 </MudAppBar>
 
 @code {
-    private string CurrentTime { get; set; } = DateTime.Now.ToString("HH:mm:ss", new CultureInfo("en-US"));
-    private string CurrentDate { get; set; } = DateTime.Now.ToString("dddd, dd.MM.yyyy", new CultureInfo("en-US"));
+    private string CurrentTime { get; set; } = DateTime.Now.ToString("HH:mm:ss dddd, dd.MM.yyyy", new CultureInfo("en-US"));
 
     protected override void OnInitialized()
     {
-        var timer = new System.Timers.Timer(1000); // 1 soniyalik timer
+        var timer = new System.Timers.Timer(1000);
         timer.Elapsed += (sender, args) =>
         {
-            CurrentTime = DateTime.Now.ToString("HH:mm:ss", new CultureInfo("en-US"));
-            CurrentDate = DateTime.Now.ToString("dddd, dd.MM.yyyy", new CultureInfo("en-US"));
+            CurrentTime = DateTime.Now.ToString("HH:mm:ss dddd, dd.MM.yyyy", new CultureInfo("en-US"));
             InvokeAsync(StateHasChanged);
         };
         timer.Start();
